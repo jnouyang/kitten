@@ -9,14 +9,14 @@
 #include <lwk/types.h>
 #include <arch/ioctl.h>
 
+struct hio_cmd_attach {
+	char name[32]; /* xemem segment name */
+};
+
 /*
  * ioctl() commands
  */
-#define HIO_TYPE                33	
-#define HIO_CMD_TEST	        _IO(HIO_TYPE, 0)
-
-struct hio_cmd_connect {
-	char name[32]; /* xemem segment name */
-};
+#define HIO_MAGIC               33	
+#define HIO_CMD_ATTACH	        _IOW(HIO_MAGIC, 0, struct hio_cmd_attach)
 
 #endif
