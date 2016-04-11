@@ -60,6 +60,7 @@ docs/latex/*
 *.orig
 *.rej
 CVS
+tags
 
 
 syntax: regexp
