@@ -11,9 +11,8 @@
 #include <linux/wait.h>
 #include <linux/cdev.h>
 
-#define MAX_STUBS               1024
+#define MAX_STUBS               32
 #define HIO_RB_SIZE             MAX_STUBS
-
 
 // transferred in the ringbuffer
 struct hio_cmd_t {
@@ -44,6 +43,8 @@ struct hio_stub {
 
 
 struct hio_engine {
+    uint32_t    magic;
+
     // We could use hashmap here, but for now just use array
     // and use rank number as the key
     struct hio_stub *stub_lookup_table[MAX_STUBS];
@@ -59,8 +60,6 @@ struct hio_engine {
 
     // wait for syscall requests
     wait_queue_head_t           syscall_wq;
-
-    struct cdev       		cdev;  
 };
 
 #endif
