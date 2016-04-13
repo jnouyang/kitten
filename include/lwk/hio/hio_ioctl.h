@@ -9,14 +9,17 @@
 #include <lwk/types.h>
 #include <arch/ioctl.h>
 
-struct hio_cmd_attach {
-	char name[32]; /* xemem segment name */
-};
+#define HIO_ENGINE_MAGIC        0x13131313
 
-/*
- * ioctl() commands
- */
-#define HIO_MAGIC               33	
-#define HIO_CMD_ATTACH	        _IOW(HIO_MAGIC, 0, struct hio_cmd_attach)
+#define HIO_ENGINE_PAGE_SIZE    4096
+#define HIO_ENGINE_SEG_NAME     "hio_engine_seg"
+
+
+// hio commands
+#define HIO_IOCTL_ENGINE_START      3300
+#define HIO_IOCTL_REGISTER          3301 // register stub
+#define HIO_IOCTL_DEREGISTER        3302
+
+#define HIO_IOCTL_ENGINE_ATTACH     3303
 
 #endif

@@ -22,6 +22,7 @@
 
 #include "hio.h"
 
+// hardcoded STUB_ID currently support on process only
 #define STUB_ID 123
 
 static int forward_syscall(int syscall_nr, uint64_t arg0, uint64_t arg1, 
@@ -50,7 +51,13 @@ hio_release(struct inode * inodep, struct file  * filp) {
     return 0;
 }
 
-
+static void engine_dispachter_loop(void) {
+    printk("Engine dispather loop...\n");
+    return;
+    do {
+        schedule();
+    } while(1);
+}
 /*
  * User ioctl to the HIO driver. 
  */
@@ -59,8 +66,29 @@ hio_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
     long ret;
 
     switch (cmd) {
-        case HIO_CMD_ATTACH: 
+        /* Get xemem address from userspace 
+         * Enter the dispatcher loop
+         */
+        case HIO_IOCTL_ENGINE_ATTACH: 
             {
+                void *buf = (void __user *)arg;
+                paddr_t   addr_pa     = 0;
+                int *ptr;
+
+                printk("HIO engine attach...\n");
+
+                if (aspace_virt_to_phys(current->aspace->id, (vaddr_t) buf, &addr_pa) < 0) {
+                    printk(KERN_ERR "Invalid user address for hio engine attach: %p\n", buf);
+                    return -1;
+                }
+
+                ptr = __va(addr_pa);
+                printk("    buffer uva %p, pa %p, kva %p, content %x\n", buf, (void *)addr_pa, ptr, *ptr);
+
+                engine = (struct hio_engine *)ptr;
+
+                engine_dispachter_loop();
+
                 engine = NULL;
 
                 break;
@@ -173,8 +201,10 @@ forward_syscall(
     return pending->ret_val;
 }
 
-/* TODO: add a kthread to dispatch syscall returns */
-
+/*
+ * Create /dev/hio
+ * Register syscall handlers
+ */
 static int
 hio_module_init(void) {
     int ret = 0;
@@ -183,12 +213,14 @@ hio_module_init(void) {
     printk(KERN_INFO "Load Hobbes IO (HIO) module\n");
 
     /* TODO: this should be instialized by attach IOCTL */
+    /*
     engine = (struct hio_engine *)kmalloc(
             sizeof(struct hio_engine), GFP_KERNEL);
     if (engine == NULL) {
         printk(KERN_ERR "Error attaching to xpmem hio_engine\n");
         return -1;
     }
+    */
 
     for (i = 0; i < MAX_STUBS; i++) {
         waitq_init(&pending_syscall_array[i].waitq);
@@ -200,8 +232,6 @@ hio_module_init(void) {
         0777,
         NULL,
         0);
-
-    /* Attach to HIO Engine shared over xpmem */
 
     syscall_register( __NR_socket, (syscall_ptr_t) hio_socket );
     syscall_register( __NR_bind, (syscall_ptr_t) hio_bind );
