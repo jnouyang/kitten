@@ -55,6 +55,7 @@ hio_release(struct inode * inodep, struct file  * filp) {
     return 0;
 }
 
+/*
 static void dump_page(void *buf) {
     unsigned long long *ptr = buf;
     int i, j;
@@ -75,6 +76,7 @@ static void dump_page(void *buf) {
         printk(KERN_INFO "\n");
     }
 }
+*/
 
 
 static void engine_dispachter_loop(void) {
@@ -84,13 +86,13 @@ static void engine_dispachter_loop(void) {
         printk(KERN_ERR "engine is NULL\n");
     }
 
-    dump_page((void *)engine);
-    printk(KERN_INFO "Test fording getpid syscall\n");
-    insert_syscall(39, 0, 0, 0, 0, 0);
+    //dump_page((void *)engine);
+    //printk(KERN_INFO "Test fording getpid syscall\n");
+    //insert_syscall(39, 0, 0, 0, 0, 0);
 
     do {
         while (engine->rb_ret_prod_idx != engine->rb_ret_cons_idx) {
-            spin_lock(&engine->lock);
+            pisces_spin_lock(&engine->lock);
 
             if (engine->rb_ret_prod_idx == engine->rb_ret_cons_idx)
                 break;
@@ -116,7 +118,7 @@ static void engine_dispachter_loop(void) {
 
 out:
             engine->rb_ret_cons_idx = (engine->rb_ret_cons_idx + 1) % HIO_RB_SIZE;
-            spin_unlock(&engine->lock);
+            pisces_spin_unlock(&engine->lock);
 
             wake_up_interruptible(&ret->waitq);
         } 
@@ -240,10 +242,9 @@ insert_syscall(
 	uint64_t    arg3,
 	uint64_t    arg4
 ) {
-    /* Assume Linux and Kitten has compatible spinlocks*/
-    //spin_lock(&engine->lock);
+    pisces_spin_lock(&engine->lock);
     if ((engine->rb_syscall_prod_idx + 1) % HIO_RB_SIZE == engine->rb_ret_cons_idx) {
-        spin_unlock(&engine->lock);
+        pisces_spin_unlock(&engine->lock);
         printk(KERN_ERR "Error: engine ringbuffer is full\n");
         return -1;
     }
@@ -258,7 +259,7 @@ insert_syscall(
     cmd->arg4 = arg4;
     engine->rb_syscall_prod_idx = (engine->rb_syscall_prod_idx + 1) % HIO_RB_SIZE;
 
-    //spin_unlock(&engine->lock);
+    pisces_spin_unlock(&engine->lock);
     return 0;
 }
 

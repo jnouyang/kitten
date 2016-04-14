@@ -10,6 +10,7 @@
 #include <lwk/types.h>
 #include <linux/wait.h>
 #include <linux/cdev.h>
+#include <arch/pisces/pisces_lock.h>
 
 #define MAX_STUBS               32
 #define HIO_RB_SIZE             MAX_STUBS
@@ -49,7 +50,7 @@ struct __attribute__((__packed__)) hio_engine {
     int                         rb_syscall_cons_idx;     // engine private
     int                         rb_ret_prod_idx;         // shared, updated by hio engine
     struct hio_cmd_t            rb[HIO_RB_SIZE];
-    spinlock_t                  lock;
+    struct pisces_spinlock      lock;
 
     // We could use hashmap here, but for now just use array
     // and use rank number as the key
