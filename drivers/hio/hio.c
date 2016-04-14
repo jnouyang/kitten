@@ -280,6 +280,8 @@ forward_syscall(
     struct pending_ret *ret = &(pending_ret_array[STUB_ID]);
     wait_event_interruptible(ret->waitq, ret->is_pending);
 
+    ret->is_pending = false;
+
     return ret->ret_val;
 }
 
@@ -326,9 +328,10 @@ hio_module_init(void) {
     syscall_register( __NR_setsockopt, (syscall_ptr_t) hio_setsockopt );
     syscall_register( __NR_getsockopt, (syscall_ptr_t) hio_getsockopt );
 
-    //syscall_register( __NR_sendto, (syscall_ptr_t) forward_syscall );
+    syscall_register( __NR_sendto, (syscall_ptr_t) forward_syscall );
+    syscall_register( __NR_recvfrom, (syscall_ptr_t) forward_syscall );
+
     //syscall_register( __NR_sendmsg, (syscall_ptr_t) forward_syscall );
-    //syscall_register( __NR_recvfrom, (syscall_ptr_t) forward_syscall );
     //syscall_register( __NR_recvmsg, (syscall_ptr_t) forward_syscall );
 
     return ret;
