@@ -152,7 +152,8 @@ hio_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
                 }
 
                 ptr = __va(addr_pa);
-                printk("    buffer uva %p, pa %p, kva %p, content %x\n", buf, (void *)addr_pa, ptr, *ptr);
+                printk("    buffer uva %p, pa %p, kva %p\n", buf, (void *)addr_pa, ptr);
+                printk("    content %x\n", *ptr);
 
                 engine = (struct hio_engine *)ptr;
 
@@ -231,6 +232,20 @@ hio_getsockopt(uint64_t arg0, uint64_t arg1,
 	uint64_t arg2, uint64_t arg3,
 	uint64_t arg4) {
     return forward_syscall(__NR_getsockopt, arg0, arg1, arg2, arg3, arg4); 
+}
+
+static int
+hio_sendto(uint64_t arg0, uint64_t arg1,
+	uint64_t arg2, uint64_t arg3,
+	uint64_t arg4) {
+    return forward_syscall(__NR_sendto, arg0, arg1, arg2, arg3, arg4); 
+}
+
+static int
+hio_recvfrom(uint64_t arg0, uint64_t arg1,
+	uint64_t arg2, uint64_t arg3,
+	uint64_t arg4) {
+    return forward_syscall(__NR_recvfrom, arg0, arg1, arg2, arg3, arg4); 
 }
 
 static int
@@ -328,11 +343,11 @@ hio_module_init(void) {
     syscall_register( __NR_setsockopt, (syscall_ptr_t) hio_setsockopt );
     syscall_register( __NR_getsockopt, (syscall_ptr_t) hio_getsockopt );
 
-    syscall_register( __NR_sendto, (syscall_ptr_t) forward_syscall );
-    syscall_register( __NR_recvfrom, (syscall_ptr_t) forward_syscall );
+    syscall_register( __NR_sendto, (syscall_ptr_t) hio_sendto );
+    syscall_register( __NR_recvfrom, (syscall_ptr_t) hio_recvfrom );
 
-    //syscall_register( __NR_sendmsg, (syscall_ptr_t) forward_syscall );
-    //syscall_register( __NR_recvmsg, (syscall_ptr_t) forward_syscall );
+    //syscall_register( __NR_sendmsg, (syscall_ptr_t) hio_sendmsg );
+    //syscall_register( __NR_recvmsg, (syscall_ptr_t) hio_recvmsg );
 
     return ret;
 }
