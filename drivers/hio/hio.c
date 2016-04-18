@@ -248,6 +248,27 @@ hio_recvfrom(uint64_t arg0, uint64_t arg1,
     return forward_syscall(__NR_recvfrom, arg0, arg1, arg2, arg3, arg4); 
 }
 
+int
+sys_hio_fcntl(uint64_t arg0, uint64_t arg1,
+	uint64_t arg2, uint64_t arg3,
+	uint64_t arg4) {
+    return forward_syscall(__NR_fcntl, arg0, arg1, arg2, arg3, arg4); 
+}
+
+int
+sys_hio_close(uint64_t arg0, uint64_t arg1,
+	uint64_t arg2, uint64_t arg3,
+	uint64_t arg4) {
+    return forward_syscall(__NR_close, arg0, arg1, arg2, arg3, arg4); 
+}
+
+int
+sys_hio_select(uint64_t arg0, uint64_t arg1,
+	uint64_t arg2, uint64_t arg3,
+	uint64_t arg4) {
+    return forward_syscall(__NR_select, arg0, arg1, arg2, arg3, arg4); 
+}
+
 static int
 insert_syscall(
 	int    syscall_nr,
