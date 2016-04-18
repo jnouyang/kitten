@@ -55,6 +55,7 @@ user/multi_loader/app1
 user/multi_loader/app2
 user/multi_loader/loader
 user/pisces/pisces
+user/hio/recv
 docs/html/*
 docs/latex/*
 *.orig

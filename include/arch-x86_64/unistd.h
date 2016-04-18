@@ -727,4 +727,14 @@ __SYSCALL(__NR_sched_setparams_task, sys_sched_setparams_task)
 __SYSCALL(__NR_sched_setparams_task, syscall_not_implemented)
 #endif
 
+/* can we use original syscall_nr + 512? */
+#define __NR_HIO_fcntl                             600
+#define __NR_HIO_close                             601
+#define __NR_HIO_select                            602
+#ifdef CONFIG_HOBBESIO
+__SYSCALL(__NR_HIO_fcntl, sys_hio_fcntl)
+__SYSCALL(__NR_HIO_close, sys_hio_close)
+__SYSCALL(__NR_HIO_select, sys_hio_select)
+#endif
+
 #endif /* _ARCH_X86_64_UNISTD_H */
