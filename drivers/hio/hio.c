@@ -132,7 +132,7 @@ out:
  */
 static long
 hio_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
-    long ret;
+    long ret = 0;
 
     switch (cmd) {
         /* Get xemem address from userspace 
@@ -157,12 +157,41 @@ hio_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
 
                 engine = (struct hio_engine *)ptr;
 
-                engine_dispachter_loop();
+                //engine_dispachter_loop();
 
-                engine = NULL;
+                //engine = NULL;
 
                 break;
             }
+        case HIO_IOCTL_SYSCALL_RET: 
+            {
+                struct hio_syscall_ret_t cur_ret;
+
+                if (copy_from_user(&cur_ret, (void __user *)arg,
+                            sizeof(struct hio_syscall_ret_t))) {
+                    printk(KERN_ERR "Error copying hio syscall cur_ret from userspace\n");
+                    return -EFAULT;
+                }
+
+                struct pending_ret *pending_ret = &pending_ret_array[cur_ret.stub_id];
+
+                if (pending_ret->is_pending) {
+                    printk(KERN_ERR "Another pending_ret is pending for stub_id %d???\n", cur_ret.stub_id);
+                    ret = -1;
+                    break;
+                } else {
+                    spin_lock(&pending_ret->lock);
+                    pending_ret->ret_val = cur_ret.ret_val;
+                    printk(KERN_INFO "Return value is %d\n", pending_ret->ret_val);
+                    pending_ret->is_pending = true;
+                    spin_unlock(&pending_ret->lock);
+                }
+
+                wake_up_interruptible(&pending_ret->waitq);
+
+                break;
+            }
+
         default:
             ret = -ENOIOCTLCMD;
             break;
