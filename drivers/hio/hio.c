@@ -337,7 +337,11 @@ forward_syscall(
 	uint64_t    arg3,
 	uint64_t    arg4
 ) {
+<<<<<<< HEAD
     //printk(KERN_INFO "Forward syscall %d\n", syscall_nr);
+=======
+    printk(KERN_INFO "Forward syscall %d\n", syscall_nr);
+>>>>>>> b84ad5db7f3c65c49d442cc21b4ef44af43df5ea
 
     if (insert_syscall(syscall_nr, arg0, arg1, arg2, arg3, arg4) < 0)
         return -1;
