@@ -182,7 +182,7 @@ hio_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
                 } else {
                     spin_lock(&pending_ret->lock);
                     pending_ret->ret_val = cur_ret.ret_val;
-                    printk(KERN_INFO "Return value is %d\n", pending_ret->ret_val);
+                    //printk(KERN_INFO "Return value is %d\n", pending_ret->ret_val);
                     pending_ret->is_pending = true;
                     spin_unlock(&pending_ret->lock);
                 }
@@ -337,7 +337,7 @@ forward_syscall(
 	uint64_t    arg3,
 	uint64_t    arg4
 ) {
-    printk(KERN_INFO "Forward syscall %d\n", syscall_nr);
+    //printk(KERN_INFO "Forward syscall %d\n", syscall_nr);
 
     if (insert_syscall(syscall_nr, arg0, arg1, arg2, arg3, arg4) < 0)
         return -1;
